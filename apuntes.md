@@ -20,7 +20,8 @@
 * __PLO__: Point-like objects. Pueden ser estrellas o cuásares distantes.
 * __IGM__: Medio intergaláctico.
 * __BAO__: Oscilaciones acústicas bariónicas. Son fluctuaciones en la densidad de materia bariónica visible en el universo causadas por ondas acústicas en el plasma primordial del universo temprano (antes de la época de recombinación).
-* __ Neurona sigmoidal__: Función que recibe N variables continuas $x_j$ y retorna el valor dado por $\sigma{\sum{j}^N{w_j x_j} + b}$, donde los $w_j$ son los pesos, $b$ es el "bias" de la neurona y $\sigma$ es la función sigmoidal.
+* __Lyman alpha forest__: Serie de líneas de absorción presentes en los espectros de galaxias y cuásares debido a múltiples transicionesdel hidrógeno neutro de las nubes de gas en el medio intergaláctico.
+* __Neurona sigmoidal__ : Función que recibe N variables continuas $x_j$ y retorna el valor dado por $\sigma{\sum{j}^N{w_j x_j} + b}$, donde los $w_j$ son los pesos, $b$ es el "bias" de la neurona y $\sigma$ es la función sigmoidal.
 * __MLP__: Multilayer Perceptron. Es una red de neuronas sigmoidales dispuestas en capas. Los valores de salida de las neuronas de una capa sirven de entrada para las neuronas de la capa siguiente. 
 
 ### Active Galactic Nuclei: what's in a name?
@@ -95,6 +96,28 @@ El objetivo fundamental del aprendizaje de máquinas es generalizar más allá d
 Esto implica que muchas veces no es necesario encontrar el óptimo absoluto de la función objetivo, basta con óptimos locales siempre que el resultado generalice.
 
 #### Los datos por sí solos no son suficientes
-Además de los datos, en general es necesario asumir ciertas cosas o tener algún conocimiento previo sobre los datos. De acuerdo a los teoremas de "no free lunch" no hay manera de que un aprendiz se superior al azar en todas las posibles funciones a ser aprendidas. No obstante, hipótesis generales como suavidad de la función, dependencias limitadas o complejidad limitada suelen ser suficientes para que los algoritmos de aprendizaje automático funcionen bien. Este tipo de conocimiento entrega una heurística para elegir la representación adecuada, que será la que exprese dichos conocimientos con mayor naturalidad.
+Además de los datos, en general es necesario asumir ciertas cosas o tener algún conocimiento previo sobre los datos. De acuerdo a los teoremas de "no free lunch" no hay manera de que un aprendiz se superior al azar en todas las posibles funciones a ser aprendidas. No obstante, hipótesis generales como suavidad de la función, dependencias limitadas o complejidad limitada suelen ser suficientes para que los algoritmos de aprendizaje automático funcionen bien. Este tipo de conocimiento entrega una heurística para elegir la representación adecuada, que será la que exprese dichos conocimientos con mayor naturalidad (aunque no siempre es así).
 
- 
+#### El sobreajuste tiene muchas facetas
+El sobreajuste es un problema recurrente. Refiere a los casos en los que el aprendiz aprende las peculiaridades del set de entrenamiento en lugar de generalizar a partir de él. Uno de los síntomas más claros de sobreajuste es cuand el clasificador tiene una desempeño perfecto en el set de entrenamiento pero no muy bueno en el set de testeo.
+
+En el texto proponen entender el sobreajuste descomponiendo el error en sesgo y varianza. El sesgo s la tendencia del aprendiz a aprender siempre la misma cosa errada, mientras que la varianza es es la tendencia a aprender cosas aleatorias independiente de la señal real. En los procesos de aprendizaje automático siempre existe un compromiso entre estas dos componentes. En general, algunas representaciones y  optimizadores sufren de una varianza muy alta cuandola cantidad de datos es pobre, pero en cambio tienen poco sesgo. Mientras que otros presentan el problema opuesto, poca varianza pero un sesgo significativo.
+
+Existen muchas técnicas para evitar el sobreajuste que sonmuy útiles cuando los datos son escasos. Uno de ellos es añadir un término de regularización a la función objetivo, con el fin de penalizar clasificadores con más estructura.
+
+#### La intuición falla en dimensiones superiores
+Después del sobreajuste, el gran problema del aprendizaje de máquinas es la llamada "maldición de la dimensionalidad". Se trata del hecho de que generalizar se vuelve exponencialmente más difícil cuando la dimensión de  los ejemplos crece, ya que un set de entrenamiento de tamaño fijo solo cubrirá una fracción muy pequeña del espacio muestral.
+
+Por otra parte, nuestras intuciones se vuelven inútiles en estos casos, ya que nuestra imagen mental del mundo es de solo tres dimensiones. En espacios multidimensionales, las intuciones geométrico-espaciales a las que estamos acostumbrados no siempre son correctas. Por ejemplo, si aproximamos una hiper-esfera inscribiéndola en un hiper-cubo, casi todo el volumen del hiper-cubo estará fuera de la hiper esfera. Este tipo de situaciones dificulta la elección de una representación adecuada.
+
+#### La clave es la ingeniería de características
+Muchas veces, los datos en crudo no está en una forma adecuada para el aprendizaje, pero se pueden construir características a partir de ellos que sí lo estén. Este proceso es usualmente el que consume el mayor esfuerzo en un proyecto de aprendizaje automático. Pero es indispensable ya quecarácteristicas independientes bien elegidas tendrán correlación con la clase y el aprendizaje será fácil. Por el contrario, si la clase es una función muy compleja de las características, el aprendiz será más propenso a fallar.
+
+Esta "ingeniería" involucra mucha prueba y error, creatividad, intuición y conocimiento del problema específico.
+
+#### Más datos le gana a un algoritmo más inteligente
+Ante un mismo set de características, existen dos maneras de mejorar los resultados obtenidos por un clasificador: Usar un algoritmo más sofisticado, o bien, recoger más datos. La mayor parte de las veces esta última opción es la más fácil y efectiva. Un algoritmo "tonto" alimentado de grandes cantidades de datos tendrá mejores resultados que uno inteligente con poco datos. Además, los algoritmos complejos tienen un costo computacional mayor, por lo que, aun teniendo muchos datos, se suele preferir un algoritmo más sencillo para ahorrar tiempo computacional.
+
+El autor argumenta que la razón es que, como primera aproximación, todos los aprendices hacen lo mismo. Agrupan los ejemplos cercanos en una misma clase, lo que cambia es la noción de distancia. 
+
+Sin embargo, al final del día el uso de algoritmos más inteligentes resulta beneficioso, siempre que uno quiera realizar el esfuerzo.
