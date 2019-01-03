@@ -21,9 +21,14 @@
 * __IGM__: Medio intergaláctico.
 * __BAO__: Oscilaciones acústicas bariónicas. Son fluctuaciones en la densidad de materia bariónica visible en el universo causadas por ondas acústicas en el plasma primordial del universo temprano (antes de la época de recombinación).
 * __Lyman alpha forest__: Serie de líneas de absorción presentes en los espectros de galaxias y cuásares debido a múltiples transicionesdel hidrógeno neutro de las nubes de gas en el medio intergaláctico.
-* __Neurona sigmoidal__ : Función que recibe N variables continuas $x_j$ y retorna el valor dado por $\sigma{\sum{j}^N{w_j x_j} + b}$, donde los $w_j$ son los pesos, $b$ es el "bias" de la neurona y $\sigma$ es la función sigmoidal.
+* __Neurona sigmoidal__: Función que recibe N variables continuas $x_j$ y retorna el valor dado por $\sigma{\sum{j}^N{w_j x_j} + b}$, donde los $w_j$ son los pesos, $b$ es el "bias" de la neurona y $\sigma$ es la función sigmoidal.
 * __MLP__: Multilayer Perceptron. Es una red de neuronas sigmoidales dispuestas en capas. Los valores de salida de las neuronas de una capa sirven de entrada para las neuronas de la capa siguiente. 
+* __Convolutional Neural Network__: This kind of network uses discrete convolutions of images to extract feature maps. In other words, the input image is divided into several overlapping squares (named _local receptive fields_) and each of them is connected to a single corresponding neuron using a shared set of weights called the kernel. This process can be done multiple times within a layer and multiple times in depth. Also, there are pooling layers, in which the input feature maps are downsampled to remove extra information.
+* __Decision tree__: Classification algorithm that recursively divides a training dataset at each node based on the binary question about the features that gives the higher information gain. Once the dataset cannot be further divided, the last nodes are called the leafs and give probabilities about belonging to a certain class. After building the tree with the training data, it can be used to classify test data.
+* __Random Forest__: Classification algorithm that divides the training dataset in random batches, selecting random features, and builds a decision tree for each of them. Finally the results of every tree are counted as votes to get the predicted classes.
+* __Batch normalization__: A transformation of input neurons that initially gives them zero mean and unit variance (over a training batch), however, two learnable parameters are added to modify the normalization if it helps during learning.
 
+* __Precision and recall__: After a classification, the precision measures how many selected items are relevant, i. e., are correctly classified: the number of true positives over the total number of positives (true + false). Instead, recall measures how many relevant items were selected. This is  the ratio of true postives and the total number of relevant items (true positives + false negatives). A plot of precision versus recall is called a ROC curve.
 ### Active Galactic Nuclei: what's in a name?
 Este artículo presenta una revisión del estado del arte (hasta el 2017) del entendimiento de los AGN desde el punto de vista observacional en todas las frecuencias del espectro electromagnético.
 
@@ -121,3 +126,50 @@ Ante un mismo set de características, existen dos maneras de mejorar los result
 El autor argumenta que la razón es que, como primera aproximación, todos los aprendices hacen lo mismo. Agrupan los ejemplos cercanos en una misma clase, lo que cambia es la noción de distancia. 
 
 Sin embargo, al final del día el uso de algoritmos más inteligentes resulta beneficioso, siempre que uno quiera realizar el esfuerzo.
+
+### Deep learning approach for classifying, detecting and predicting redshifts of quasars in the Sloan Digital Sky Survey stripe 82
+
+#### Introduction
+The aim of this paper is to provide an automatic method ofdetecting quasars in photometric data, in a way that is scalable to the upcoming big surveys as LSST. Previous work have used several machine learning classifiers to tackle this task, notably random forest classifiers.
+
+The proposed method is to use Convolutional Neural Networks to learn from spectroscopically confirmed SDSS quasars lightcurves. The advantage of this method is that no feature engineering is required as the net extracts itself the best featuresfor learning.
+
+#### The database
+The data used for training comes from the stripe 82 of theSDSS, which has a footprint of 275 sq. deg. and an increased depth and cadence respect the rest of the survey. In particular, the authors used the 5-band lightcurves of 67507variable candidates as presented in the UWVSC catalog. The reasons listed for using this catalog are:
+1. Contains over 9000 confirmed quasars with a broad distributions of redshifts
+2. Has good photometry
+3. Testbed for future time-domain surveys 
+
+#### The CNN
+The first step was to convert the time series into images. This was done by stacking each color channel on a 5 pixel wide image. The original length of 3340 pixels (1/day) was down sampled to 1670 (1/ 2 days) and then 30 pixels were added to each side to avoid side effects during the convolutions. The final sizes are 5x1700 pixels.
+
+As a data augmentation procedure, the authors exploited the temporal translation invariance. This mean they created a lot of random translations on every image in order to expand the dataset size by a factor of 13. In this way the actual position of every signal is averaged out.
+
+In the proposed architecture, the authors use two types of convolutions:
+- __Temporal convolutions__ : Convolute each color channel separately, with a kernel of width 1 pixel and length in the interval {5,11,21,41}. This type of convolution is expected to learn variability features at different resolutions
+ 
+- __Filter convolutions__ : These use a kerenel of size 5x1, so they integrate color information at a given time  
+
+They also include multiple pooling layers, using both an adapted version of mean pooling (wich omits zero values) and max pooling.
+
+On the first convolutions layers, an hyperbolic tangent activation function was used (tanch). The following layers use PReLU.
+
+The detailed architecture is fairly complex and deep, so here I give a broad description. The overall structure is arranged into sucessive processing blocks at different temporal resolutions, on five levels of depth. At each processing level the resolution is reduced by a factor of two. Also, a set of feature maps coming from the input image are feeded and processed on each block. Both types of convolution are present on each block, followed by concatenation operations (either in the temporal or color domain). Finally, the output feature maps are feeded into three fully connected layers, ending on a softmax layer of three neurons, which represent the classes quasar, variable star and other object.
+
+To decrease the effects of overfitting, the authors use batch normalization on all feature maps. In addition, the neurons on the fully connected layers are randomly dropout during training. Finally, they did five cross-validatons of the database on the training phase, using 75% of the data as the training set and 25% as the testing set. Each CNN completed learning on 60 epochs. All the experiments were implemented in the Caffe framework running on top of a GTX Titan X GPU, however they do not provide the source code nor the trained weights.
+
+#### Results
+The results are shown as the testing recall as a function  of g magnitude and redshift. Below 17 magnitudes the recall decreases to 50%. The highest recall (95%) is recorded in magnitudes greater than 17. On the contrary, a high recall is achieved in all redshift bins, hence the authors conclude the CNN is invariant to redshift.
+
+At 0.97 recall, the CNN is able to detect 175 new quasar candidates, with a fairly uniform spatial distribution. Also, as recall increases, the spatial density of detected quasars increases.
+
+To further analyze the results, the authors train a random forest clasifier to compare it's performance with the CNN. The forest contains 400 decision trees and unlimited depth. The features feeded into the classifier were extracted with the FATS python library. It turns out that the RF performed on par or better than the CNN at some recall ranges. The authors explain that the RF has less parameters to fit (640000), whereas the CNN has about 13000000, so it is less prone to overfit. However, they expect the CNN approach to outperform the RF in larger databases.
+
+Finally, a ROC curve is presented for both methods and also a ROC curve of the combination of the two classifiers. This combination performed better than each classifier separately, giving a precision of 0.99 at a recall of 0.90.
+
+#### Photometric redshift
+
+The authors considered the same CNN architecture, but this time with 60 softmax output neurons, corresponding to redshift bins of 0.04 in width.  They also explored the use of support vector machines, K-nearest neighbors, random forests and Gaussian process classifiers with different combinations of features for comparison.
+
+The best of the non-CNN classifiers was the KNN using only the photometric colors as features. So this was the chosen method to compare the CNN with. It turned out that the CNN gave a slightly better performance in estimating redshifts than the CNN, and again, a combination of the two further improved the results.
+
