@@ -7,6 +7,6 @@
 
 TODO:
 - [x] Find a way to read the latest version of the MQC
-- [ ] Keep only the spectroscopically confirmed quasars
+- [X] Keep only the spectroscopically confirmed quasars
 - [ ] Make a training/testing set 1 using ugriz photometry from DR15, known classes and redshifts, the set should also include non quasar PLOs
 - [ ] Make a training/testing  set 2 using the spectra of the known quasars and stars, together with its redshift. This dataset will probably be smaller than dataset 1, but could better justify the use of deep-learning because of the automatic feature extraction
