@@ -6,7 +6,7 @@
 5. I performed a positional crossmatch between MQCv5.2 and Gaia DR2 with a max radius of 1 arcsecond. The search returned more than 200k rows, but the distribution of distances was slightly bi-modal, hence suggesting contamination from other sources. However, even selecting the nearest match and dropping the other matches, the bump was still there in the histogram.
 
 TODO:
-- [ ] Find a way to read the latest version of the MQC
+- [x] Find a way to read the latest version of the MQC
 - [ ] Keep only the spectroscopically confirmed quasars
 - [ ] Make a training/testing set 1 using ugriz photometry from DR15, known classes and redshifts, the set should also include non quasar PLOs
 - [ ] Make a training/testing  set 2 using the spectra of the known quasars and stars, together with its redshift. This dataset will probably be smaller than dataset 1, but could better justify the use of deep-learning because of the automatic feature extraction
