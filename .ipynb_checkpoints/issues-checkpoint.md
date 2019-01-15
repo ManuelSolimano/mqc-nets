@@ -10,6 +10,7 @@ TODO:
 - [x] Find a way to read the latest version of the MQC
 - [X] Keep only the spectroscopically confirmed quasars
 - [X] Find a way to retrieve legacy spectra listed on DR14Q
+- [X] Prototype spectrum reduction pipeline (subsampling and interpolation)
 - [ ] Add class information to header of spectra, or better, create a lookup table
 - [ ] Include line recognition flags, i.e should the model be a line finder?
 - [ ] (almost done) Make a training/testing set 1 using ugriz photometry from DR15, known classes and redshifts, the set should also include non quasar PLOs
