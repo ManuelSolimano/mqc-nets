@@ -26,7 +26,7 @@ def normalize(spectrum):
     sdata = np.average((spectrum['flux'] - mdata) ** 2, weights = spectrum['ivar'])
     sdata = np.sqrt(sdata) 
     
-    normflux = (flux - mdata) / sdata
+    normflux = (spectrum['flux'] - mdata) / sdata
     normspec = spectrum
     normspec['flux'] = normflux
     return normspec
@@ -84,8 +84,8 @@ def load_1d_spectrum(filename):
 
 
 if __name__ == "__main__":
-    spec = fitsio.read('data/spectra1000/spec-4216-55477-0210.fits', columns=['flux','loglam'], dtype=np.float32)
-    subspec = crop_and_subsample(spec, 503, (3.56, 4.01))
-
+    spec = fitsio.read('data/spectra1000/spec-4216-55477-0210.fits', columns=['flux','loglam', 'ivar'], dtype=np.float32)
+    #subspec = crop_and_subsample(spec, 503, (3.56, 4.01))
+    normalized = normalize(spec)
 
 
