@@ -4,11 +4,18 @@ read the spectra in a way it is feedable into the model
 import numpy as np
 import fitsio
 from fitsio import FITS, FITSHDR
-import sys
+import os
+import shutil
 from scipy.signal import resample
 from scipy.interpolate import interp1d
 
+
 endianess = {'big': '>', 'little':'<'}
+
+DATA_PATH = '/home/manuel/Documents/mqc-nets/data'
+KNOWN_QSOS = np.loadtxt('/'.join([DATA_PATH, 'dr14q_specids.txt']), dtype=np.uint64)
+KNOWN_STARS = np.loadtxt('/'.join([DATA_PATH, 'dr15stars_boss_masolimano.csv']), 
+                         dtype=np.uint64, delimiter=',', skiprows=1, usecols=0)
 
 def normalize(spectrum):
     """
@@ -101,11 +108,17 @@ def shrink_spectra(filepath):
     the data needed is contained in the header and the
     flux, loglam and ivar columns. This function
     trims the original fits file and saves the lightweight
-    function in a {parent}_ultralight folder. Then deletes the original
+    version in a {parent}_ultralight folder. Then deletes the original
     file.
     """
     pathlist = filepath.split('/')
-    newpath = '{}_ultralight/{}'.format('/'.join(pathlist[:-1]), pathlist[-1])
+    ultralight_parent  = '{}_ultralight'.format('/'.join(pathlist[:-1]))
+    
+    # Check if the target directory exists
+    if not os.path.exists(ultralight_parent):
+        os.mkdir(ultralight_parent)
+    
+    newpath = '/'.join([ultralight_parent, pathlist[-1]])
     
     temp = tempfile.NamedTemporaryFile(delete=False)
     with fits.open(filepath) as hdul:
@@ -113,7 +126,7 @@ def shrink_spectra(filepath):
         hdul[1].data = hdul[1].data.from_columns(relevant_cols)
         hdul = hdul[:2]
         hdul.writeto(temp)
-        
+    
     os.remove(filepath)
     print('Removed ' + filepath)
     shutil.move(temp.name, newpath)
@@ -155,8 +168,19 @@ def load_1d_spectrum(filename):
         - X : resampled spectrum  (numpy array)
         - Y : truth vector indicating class
     """
-    pass
-
+    # First, load the file while enforcing the correct endianess
+    spec = fitsio.read(filename, columns=['flux', 'loglam', 'ivar'], dtype = np.dtype('<f4'))
+    
+    # Normalize input spectrum
+    normalized = normalize(spec)
+    
+    # Subsampling
+    X = crop_and_subsample(normalized, 503, (3.56, 4.01))
+    
+    # Retrieve truth vector
+    Y = tell_the_truth(filename)
+    
+    return X, Y
 
 
 if __name__ == "__main__":

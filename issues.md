@@ -6,6 +6,7 @@
 5. I performed a positional crossmatch between MQCv5.2 and Gaia DR2 with a max radius of 1 arcsecond. The search returned more than 200k rows, but the distribution of distances was slightly bi-modal, hence suggesting contamination from other sources. However, even selecting the nearest match and dropping the other matches, the bump was still there in the histogram.
 6. Some DR14Q spectra aren't found at ```https://data.sdss.org/sas/dr15/eboss/spectro/redux/v5_10_0/spectra/``` because they are legacy spectra that belong to a different survey program and different ```RUN2D```. So the ```wget``` command has to be modified in order to retrieve those files.
 7. Great, I spend a lot of time collecting the photometry of DR14Q sources while the catalog fits file included the ugriz magnitudes!
+8. I have to downgrade to Python 3.6 because TensorFlow doesn't support Python 3.7, this means creating a new environment
 TODO:
 - [x] Find a way to read the latest version of the MQC
 - [X] Keep only the spectroscopically confirmed quasars
