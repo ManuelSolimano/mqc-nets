@@ -8,16 +8,17 @@ import os
 import shutil
 from scipy.signal import resample
 from scipy.interpolate import interp1d
-
+import tempfile
+from astropy.io import fits
 
 endianess = {'big': '>', 'little':'<'}
 
-DATA_PATH = '/home/manuel/Documents/mqc-nets/data'
+DATA_PATH = '/home/manuel/mqc/data'
 KNOWN_QSOS = np.loadtxt('/'.join([DATA_PATH, 'dr14q_specids.txt']), dtype=np.uint64)
 KNOWN_STARS = np.loadtxt('/'.join([DATA_PATH, 'dr15stars_boss_masolimano.csv']), 
                          dtype=np.uint64, delimiter=',', skiprows=1, usecols=0)
 
-def normalize(spectrum):
+def normalize(spectrum, method='max'):
     """
     (Re)normalize spectral flux according to what I understood from
     the QuasarNET paper and code (Busca ,2018).
@@ -28,16 +29,21 @@ def normalize(spectrum):
         
     TODO: Test function to evaluate the need  of corner case management
     """
-    
-    mdata = np.average(spectrum['flux'] , weights = spectrum['ivar'])
-    sdata = np.average((spectrum['flux'] - mdata) ** 2, weights = spectrum['ivar'])
-    sdata = np.sqrt(sdata) 
-    
-    normflux = (spectrum['flux'] - mdata) / sdata
-    normspec = spectrum
-    normspec['flux'] = normflux
-    return normspec
+    if method == 'quasarnet':
+        mdata = np.average(spectrum['flux'] , weights = spectrum['ivar'])
+        sdata = np.average((spectrum['flux'] - mdata) ** 2, weights = spectrum['ivar'])
+        sdata = np.sqrt(sdata) 
 
+        normflux = (spectrum['flux'] - mdata) / sdata
+        normspec = spectrum.copy()
+        normspec['flux'] = normflux
+        return normspec
+    
+    elif method == 'max':
+        normspec = spectrum.copy()
+        normspec['flux'] = spectrum['flux'] / spectrum['flux'].max()
+        return normspec
+    
 def hash_specid(plate, mjd, fiberid, run2d):
     """
     Hash function that computes the SpecObj ID from the four spectral
@@ -94,15 +100,17 @@ def tell_the_truth(filename):
     specid = hash_specid(*spec4numbers)  # Compute specobjid hash 
     
     if specid in KNOWN_QSOS:
-        return np.array([1., 0.])
-    
+#         return np.array([1., 0.])
+        return np.array([1.])
+        
     elif specid in KNOWN_STARS:
-        return np.array([0., 0.])
+#         return np.array([0., 0.])
+        return np.array([0.])
     
     else:
         return None
     
-def shrink_spectra(filepath):
+def shrink_spectra(filepath, delete_source=False):
     """
     Remove unnecesary data from the spectral FITS file. All
     the data needed is contained in the header and the
@@ -121,16 +129,25 @@ def shrink_spectra(filepath):
     newpath = '/'.join([ultralight_parent, pathlist[-1]])
     
     temp = tempfile.NamedTemporaryFile(delete=False)
-    with fits.open(filepath) as hdul:
-        relevant_cols = hdul[1].data.columns[:3]
-        hdul[1].data = hdul[1].data.from_columns(relevant_cols)
-        hdul = hdul[:2]
-        hdul.writeto(temp)
     
-    os.remove(filepath)
-    print('Removed ' + filepath)
-    shutil.move(temp.name, newpath)
-    print('Created ' + newpath)
+    try:
+        with fits.open(filepath) as hdul:
+            relevant_cols = hdul[1].data.columns[:3]
+            hdul[1].data = hdul[1].data.from_columns(relevant_cols)
+            hdul = hdul[:2]
+            hdul.writeto(temp)
+
+        shutil.move(temp.name, newpath)
+        print('Created ' + newpath)
+
+        if delete_source:
+            os.remove(filepath)
+            print('Removed ' + filepath)
+    
+    except TypeError:
+        print(filepath + ' is defective, not processed')
+    
+    
     temp.close()
 
 def crop_and_subsample(nspec, pixels, borders):
@@ -160,7 +177,7 @@ def crop_and_subsample(nspec, pixels, borders):
     sub_flux, sub_loglam = resample(new_flux, pixels, new_loglam)
     return sub_flux
 
-def load_1d_spectrum(filename):
+def load_1d_spectrum(filename, sampling=503, endpoints=(3.58, 3.96)):
     """
     params: filename: the path to the spectrum file
 
@@ -175,7 +192,7 @@ def load_1d_spectrum(filename):
     normalized = normalize(spec)
     
     # Subsampling
-    X = crop_and_subsample(normalized, 503, (3.56, 4.01))
+    X = crop_and_subsample(normalized, sampling, endpoints)
     
     # Retrieve truth vector
     Y = tell_the_truth(filename)
