@@ -169,7 +169,7 @@ def crop_and_subsample(nspec, pixels, borders):
     flux, loglam =  nspec['flux'], nspec['loglam']
     
     # Interpolate the input spectrum over the desired borders
-    inter_spec = interp1d(loglam, flux, kind = 'cubic')
+    inter_spec = interp1d(loglam, flux, kind = 'cubic', bounds_error=False, fill_value=0.0)    # Fill with zeros if out of bounds
     new_loglam = np.linspace(*borders, len(flux), endpoint=True)
     new_flux = inter_spec(new_loglam)
     

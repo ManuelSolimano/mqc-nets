@@ -6,7 +6,7 @@ import h5py
 import os
 
 sampling = 433
-fileglob = glob('data/starboss/*.fits')[:200]
+fileglob = glob('data/starboss/*.fits')
 number_of_files = len(fileglob)
 
 X_array = np.zeros((number_of_files, sampling, ))
@@ -21,10 +21,13 @@ try:
             print('Processed  {} files so far'.format(i + 1))
 except ValueError:
     print(filename + ' caused problems')
-os.remove('data/reduced_starboss.h5')
+
+if os.path.exists('data/reduced_starboss.h5'):
+    os.remove('data/reduced_starboss.h5')
+
 with h5py.File('data/reduced_starboss.h5') as hdf:       
-    X_dset  = hdf.create_dataset('fluxes', shape=(number_of_files, sampling, ), dtype='f')
-    Y_dset = hdf.create_dataset('classes', shape=(number_of_files, 1,), dtype='f')
+    X_dset  = hdf.create_dataset('fluxes', shape=(number_of_files, sampling, ), dtype='f4')
+    Y_dset = hdf.create_dataset('classes', shape=(number_of_files, 1,), dtype='f4')
     X_dset[:] = X_array
     Y_dset[:] = Y_array
 
