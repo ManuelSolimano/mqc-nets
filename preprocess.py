@@ -6,7 +6,11 @@ import h5py
 import os
 
 sampling = 433
-fileglob = glob('data/starboss/*.fits')
+qsoglob = glob('data/quasarboss/*.fits')[:1000]
+starglob = glob('data/starboss/*.fits')[:1000]  # These files aren't reduced in size but may still work
+
+fileglob = qsoglob + starglob
+
 number_of_files = len(fileglob)
 
 X_array = np.zeros((number_of_files, sampling, ))
@@ -22,10 +26,10 @@ try:
 except ValueError:
     print(filename + ' caused problems')
 
-if os.path.exists('data/reduced_starboss.h5'):
-    os.remove('data/reduced_starboss.h5')
+if os.path.exists('data/dataset2K_433t.h5'):
+    os.remove('data/dataset2K_433t.h5')
 
-with h5py.File('data/reduced_starboss.h5') as hdf:       
+with h5py.File('data/dataset2K_433t.h5') as hdf:       
     X_dset  = hdf.create_dataset('fluxes', shape=(number_of_files, sampling, ), dtype='f4')
     Y_dset = hdf.create_dataset('classes', shape=(number_of_files, 1,), dtype='f4')
     X_dset[:] = X_array
