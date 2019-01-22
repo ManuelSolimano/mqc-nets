@@ -5,3 +5,4 @@ plots
 __pycache__
 .ipynb_checkpoints/*
 monitor_download.sh
+.git.bfg-report/
