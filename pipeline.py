@@ -10,13 +10,19 @@ from scipy.signal import resample
 from scipy.interpolate import interp1d
 import tempfile
 from astropy.io import fits
+import json
 
-endianess = {'big': '>', 'little':'<'}
 
-DATA_PATH = '/home/manuel/mqc/data'
-KNOWN_QSOS = np.loadtxt('/'.join([DATA_PATH, 'dr14q_specids.txt']), dtype=np.uint64)
-KNOWN_STARS = np.loadtxt('/'.join([DATA_PATH, 'dr15stars_boss_masolimano.csv']), 
-                         dtype=np.uint64, delimiter=',', skiprows=1, usecols=0)
+# I decided global variables are crap and only serve to break things
+# DATA_PATH = '/home/manuel/mqc/data'
+# KNOWN_QSOS = np.loadtxt('/'.join([DATA_PATH, 'dr14q_specids.txt']), dtype=np.uint64)
+# KNOWN_STARS = np.loadtxt('/'.join([DATA_PATH, 'dr15stars_boss_masolimano.csv']), 
+#                          dtype=np.uint64, delimiter=',', skiprows=1, usecols=0)
+
+# with open(DATA_PATH + '/stellar_classes.json') as dic
+#     stellar_class = json.load(dic)
+
+# The strategy now is to pass a ``lookup`` dict to tell_the_truth
 
 def normalize(spectrum, method='max'):
     """
@@ -85,30 +91,34 @@ def hash_specid(plate, mjd, fiberid, run2d):
     specid = int(key, base=2)
     return specid
 
-def tell_the_truth(filename):
+def tell_the_truth(filename, lookup):
     """ Return the truth vector for a given spectrum filename.
-    Constants KNOWN_QSOS and KNOWN_STARS must be loaded in memory.
+    
     parameters:
         -filename: str, the path to the spectrum fits file
+        -lookup: dict that maps each SpecObjID to a (str) class
+    
     return:
-        -truth: array, [qso_prob, redshift]
+        -truth: array of shape (11,). The class bins are ordered as 
+        follow: QSO, O, B, A, F, G, K, M, L, WD, C
     
     TODO: Implement redshift  retrieval from fits file or specobjid
     """
     header = fitsio.read_header(filename)
     spec4numbers = (header['PLATEID'], header['MJD'], header['FIBERID'], header['RUN2D'].strip())
-    specid = hash_specid(*spec4numbers)  # Compute specobjid hash 
+    specid = str(hash_specid(*spec4numbers))  # Compute specobjid hash 
     
-    if specid in KNOWN_QSOS:
-#         return np.array([1., 0.])
-        return np.array([1.])
+    assert specid in lookup, "SpecObjID not found in lookup table"
+    
+    truth = np.zeros(11)
+    
+    stype = lookup[specid]
+    index = ['QSO', 'O', 'B', 'A', 'F', 'G', 'K', 
+             'M', 'L', 'WD', 'C'].index(stype)
+    truth[index] = 1
         
-    elif specid in KNOWN_STARS:
-#         return np.array([0., 0.])
-        return np.array([0.])
-    
-    else:
-        return None
+    return truth
+
     
 def shrink_spectra(filepath, delete_source=False):
     """
@@ -177,7 +187,7 @@ def crop_and_subsample(nspec, pixels, borders):
     sub_flux, sub_loglam = resample(new_flux, pixels, new_loglam)
     return sub_flux
 
-def load_1d_spectrum(filename, sampling=503, endpoints=(3.58, 3.96)):
+def load_1d_spectrum(filename, lookup, sampling=503, endpoints=(3.58, 3.96)):
     """
     params: filename: the path to the spectrum file
 
@@ -195,7 +205,7 @@ def load_1d_spectrum(filename, sampling=503, endpoints=(3.58, 3.96)):
     X = crop_and_subsample(normalized, sampling, endpoints)
     
     # Retrieve truth vector
-    Y = tell_the_truth(filename)
+    Y = tell_the_truth(filename, lookup)
     
     return X, Y
 
