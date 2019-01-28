@@ -99,8 +99,8 @@ def tell_the_truth(filename, lookup):
         -lookup: dict that maps each SpecObjID to a (str) class
     
     return:
-        -truth: array of shape (11,). The class bins are ordered as 
-        follow: QSO, O, B, A, F, G, K, M, L, WD, C
+        -truth: array of shape (12,). The class bins are ordered as 
+        follow: QSO, BAL, O, B, A, F, G, K, M, L, WD, C
     
     TODO: Implement redshift  retrieval from fits file or specobjid
     """
@@ -108,12 +108,14 @@ def tell_the_truth(filename, lookup):
     spec4numbers = (header['PLATEID'], header['MJD'], header['FIBERID'], header['RUN2D'].strip())
     specid = str(hash_specid(*spec4numbers))  # Compute specobjid hash 
     
-    assert specid in lookup, "SpecObjID not found in lookup table"
+    assert specid in lookup,
+    "SpecObjID {} not found in lookup table".format(specid) + \
+    " | {} {} {} {}".format(*spec4numbers)
     
-    truth = np.zeros(11)
+    truth = np.zeros(12)
     
     stype = lookup[specid]
-    index = ['QSO', 'O', 'B', 'A', 'F', 'G', 'K', 
+    index = ['QSO', 'BAL', 'O', 'B', 'A', 'F', 'G', 'K', 
              'M', 'L', 'WD', 'C'].index(stype)
     truth[index] = 1
         

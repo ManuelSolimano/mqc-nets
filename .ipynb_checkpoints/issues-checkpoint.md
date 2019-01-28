@@ -21,7 +21,14 @@ TODO:
 - [X] Add class information to header of spectra, or better, create a lookup table
 - [ ] Study what ``scipy.signal.resample`` is doing behind the screens
 - [X] Get the new model working on the extended dataset (may be necessary to check the file is OK)
-- [ ] Fix bugs in ``performance_plots``.
+- [ ] Build the full-size dataset trying to match stellar type abundances with those reported by SDSS, instead of splitting in equal parts. Also, add QSO_BAL class.
+- [ ] Find out why some specObjIDs are not found in the lookup json file.
+- [ ] Incorporate SNR to input data
+- [ ] Select spectra of galaxies to include in the dataset.
+- [X] Fix bugs in ``performance_plots``.
+- [X] Find a way to plot a confusion matrix
+- [ ] Use k-fold cross-validation.
 - [ ] Include line recognition flags, i.e should the model be a line finder?
+- [ ] Use multitask learning to compute the redshift alongside classification 
 - [ ] (almost done) Make a training/testing set 1 using ugriz photometry from DR15, known classes and redshifts, the set should also include non quasar PLOs
-- [ ] Make a training/testing  set 2 using the spectra of the known quasars and stars, together with its redshift. This dataset will probably be smaller than dataset 1, but could better justify the use of deep-learning because of the automatic feature extraction
+- [X] Make a training/testing  set 2 using the spectra of the known quasars and stars, together with its redshift. This dataset will probably be smaller than dataset 1, but could better justify the use of deep-learning because of the automatic feature extraction
