@@ -1,7 +1,9 @@
-data
 *.fits
-plots
 *.pyc
+plots
 __pycache__
 .ipynb_checkpoints/*
-.git.bfg-report/
+.git.bfg-report/*
+
+data/*
+!data/all_spectra_urls.txt

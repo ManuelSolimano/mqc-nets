@@ -105,13 +105,13 @@ def tell_the_truth(filename, lookup):
     TODO: Implement redshift  retrieval from fits file or specobjid
     """
     header = fitsio.read_header(filename)
-    spec4numbers = (header['PLATEID'], header['MJD'], header['FIBERID'], header['RUN2D'].strip())
+    spec4numbers = (header['PLATEID'], header['MJD'], 
+                    header['FIBERID'], header['RUN2D'].strip())
     specid = str(hash_specid(*spec4numbers))  # Compute specobjid hash 
     
-    assert specid in lookup,
-    "SpecObjID {} not found in lookup table".format(specid) + \
+    error = "SpecObjID {} not found in lookup table".format(specid) + \
     " | {} {} {} {}".format(*spec4numbers)
-    
+    assert specid in lookup, error
     truth = np.zeros(12)
     
     stype = lookup[specid]

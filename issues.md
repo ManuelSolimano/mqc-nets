@@ -27,6 +27,9 @@ TODO:
 - [ ] Select spectra of galaxies to include in the dataset.
 - [X] Fix bugs in ``performance_plots``.
 - [X] Find a way to plot a confusion matrix
+- [ ] Add more plots to the README (to further characterize the dataset)
+- [ ] Add diagram of network architecture
+- [ ] Upload dataset to kaggle
 - [ ] Use k-fold cross-validation.
 - [ ] Include line recognition flags, i.e should the model be a line finder?
 - [ ] Use multitask learning to compute the redshift alongside classification 
