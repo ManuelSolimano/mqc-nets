@@ -1,9 +1,12 @@
 *.fits
 *.pyc
-plots
 __pycache__
 .ipynb_checkpoints/*
 .git.bfg-report/*
-
+plots/*
+!plots/model10v2_run1_cm.png
 data/*
 !data/all_spectra_urls.txt
+*.log
+targets.txt
+pathfile.txt

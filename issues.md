@@ -12,6 +12,7 @@
 11. The ``performance_plots`` function has bugs: 
   - Parsing metadata to png plots is silently failing because (I guess) some values in the dictionary are not strings.
   - If the metrics passed to the compiler are other than ``binary_accuracy``, it fails.
+12. 30 January: I discovered I was croping in a much narrower interval than I supposed! The default interval  of `load_1d_spec` was (3.58-3.96) instead of (3.56-4.01). Press F to pay respects :/ 
 TODO:
 - [x] Find a way to read the latest version of the MQC
 - [X] Keep only the spectroscopically confirmed quasars
@@ -21,7 +22,7 @@ TODO:
 - [X] Add class information to header of spectra, or better, create a lookup table
 - [ ] Study what ``scipy.signal.resample`` is doing behind the screens
 - [X] Get the new model working on the extended dataset (may be necessary to check the file is OK)
-- [ ] Build the full-size dataset trying to match stellar type abundances with those reported by SDSS, instead of splitting in equal parts. Also, add QSO_BAL class.
+- [X] Build the full-size dataset trying to match stellar type abundances with those reported by SDSS, instead of splitting in equal parts. Also, add QSO_BAL class.
 - [ ] Find out why some specObjIDs are not found in the lookup json file.
 - [ ] Incorporate SNR to input data
 - [ ] Select spectra of galaxies to include in the dataset.

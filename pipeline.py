@@ -100,7 +100,7 @@ def tell_the_truth(filename, lookup):
     
     return:
         -truth: array of shape (12,). The class bins are ordered as 
-        follow: QSO, BAL, O, B, A, F, G, K, M, L, WD, C
+        follow: QSO, BAL, O, B, A, F, G, K, M, L, WD, C, GAL
     
     TODO: Implement redshift  retrieval from fits file or specobjid
     """
@@ -112,11 +112,11 @@ def tell_the_truth(filename, lookup):
     error = "SpecObjID {} not found in lookup table".format(specid) + \
     " | {} {} {} {}".format(*spec4numbers)
     assert specid in lookup, error
-    truth = np.zeros(12)
+    truth = np.zeros(13)
     
     stype = lookup[specid]
     index = ['QSO', 'BAL', 'O', 'B', 'A', 'F', 'G', 'K', 
-             'M', 'L', 'WD', 'C'].index(stype)
+             'M', 'L', 'WD', 'C', 'GAL'].index(stype)
     truth[index] = 1
         
     return truth
@@ -189,7 +189,7 @@ def crop_and_subsample(nspec, pixels, borders):
     sub_flux, sub_loglam = resample(new_flux, pixels, new_loglam)
     return sub_flux
 
-def load_1d_spectrum(filename, lookup, sampling=503, endpoints=(3.58, 3.96)):
+def load_1d_spectrum(filename, lookup, sampling=503, endpoints=(3.56, 4.01)):
     """
     params: filename: the path to the spectrum file
 

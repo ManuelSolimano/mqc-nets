@@ -5,22 +5,20 @@ import pipeline as io
 import h5py
 import os
 import json
+import argparse
 
 
-
-def create_hdf5(quasarnum, starfname, sampling, classes):
+def create_hdf5(path, sampling,
+                classes, verbose=True):
     """ Build a HDF5 file containing the subsampled spectra
     and their truth vectors.
     
     Parameters
     ----------
-    quasarnum: int
-        Number of quasar spectra to (randomly) sample.
-        If negative pick all the available spectra.
     
-    starfname: str
-        Path to the file containing the filenames of
-        the selected stellar sample.
+    path: str,
+        filename of the list containing the path to every
+        selected spectra
     
     sampling: int
         Number of wavelength steps for subsampling spectra.
@@ -33,22 +31,20 @@ def create_hdf5(quasarnum, starfname, sampling, classes):
         lookup = json.load(clas)
 
 
-    qsoglob = glob('data/quasarboss/*.fits')
-    if quasarnum > 0:
-        qsoglob = np.array(qsoglob)
-        qsoglob = qsoglob[np.random.choice(qsoglob.size,
-                                           quasarnum,
-                                           replace=False)].tolist()
+#     qsoglob = glob('data/quasarboss/*.fits')
+#     if quasarnum > 0:
+#         qsoglob = np.array(qsoglob)
+#         qsoglob = qsoglob[np.random.choice(qsoglob.size,
+#                                            quasarnum,
+#                                            replace=False)].tolist()
 
-    with open(starfname, 'r') as sb:
-        starglob = []
-        for line in sb:
-            starglob.append(line.strip())
-
-    fileglob = qsoglob + starglob
+    with open(path, 'r') as pb:
+        fileglob = []
+        for line in pb:
+            fileglob.append(line.strip())
 
     number_of_files = len(fileglob)
-
+    print('Files listed: {}'.format(number_of_files))
     X_array = np.zeros((number_of_files, sampling,))
     Y_array = np.zeros((number_of_files, classes,))
 
@@ -92,4 +88,10 @@ def create_hdf5(quasarnum, starfname, sampling, classes):
     print('Done with {} files'.format(count))
     
 if __name__ == "__main__":
-    create_hdf5(-1, 'data/filelist_starboss_full.txt', 433, 12)
+    parser = argparse.ArgumentParser(description='Loop processing through all the spectra')
+    parser.add_argument("path", help='Filename of the list of FITS files to process')
+
+    parser.add_argument("--verbose", help='If True will print a line every 10 processed files. Else will only issue the warnings and erros. Defaults to true', action='store_true')
+    args = parser.parse_args()
+    
+    create_hdf5(args.path, 433, 13, verbose=args.verbose)
