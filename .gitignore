@@ -6,6 +6,7 @@ __pycache__
 plots/*
 !plots/model10v2_run1_cm.png
 !plots/architecture-model10v2.svg
+!plots/star_population.png
 data/*
 !data/all_spectra_urls.txt
 *.log
